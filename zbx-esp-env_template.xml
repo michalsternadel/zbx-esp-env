@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>5.0</version>
+    <date>2020-08-06T08:41:20Z</date>
+    <groups>
+        <group>
+            <name>Environment</name>
+        </group>
+    </groups>
+    <templates>
+        <template>
+            <template>Template_ZBX-ESP-ENV</template>
+            <name>Template_ZBX-ESP-ENV</name>
+            <description>Temperature and humidity monitoring for Zabbix using ESP8266 and DHT11 sensors.</description>
+            <templates>
+                <template>
+                    <name>Template Module ICMP Ping</name>
+                </template>
+            </templates>
+            <groups>
+                <group>
+                    <name>Environment</name>
+                </group>
+            </groups>
+            <applications>
+                <application>
+                    <name>Environmental data</name>
+                </application>
+            </applications>
+            <discovery_rules>
+                <discovery_rule>
+                    <name>Discovery Sensors</name>
+                    <type>HTTP_AGENT</type>
+                    <key>discovery.sensors</key>
+                    <delay>{$INTERVALLLDHTTP}</delay>
+                    <lifetime>{$LOSTPERIOD}</lifetime>
+                    <description>Discovery Data Raw All</description>
+                    <item_prototypes>
+                        <item_prototype>
+                            <name>{#NAME} Humidity</name>
+                            <type>HTTP_AGENT</type>
+                            <key>sensor.humidity[{#INDEX}]</key>
+                            <delay>{$UPINTERVALLLD}</delay>
+                            <history>{$HISTORYSP}</history>
+                            <value_type>FLOAT</value_type>
+                            <units>%</units>
+                            <applications>
+                                <application>
+                                    <name>Environmental data</name>
+                                </application>
+                            </applications>
+                            <url>http://{HOST.CONN}/h/{#INDEX}</url>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>{#NAME} Temperature</name>
+                            <type>HTTP_AGENT</type>
+                            <key>sensor.temperature[{#INDEX}]</key>
+                            <delay>{$UPINTERVALLLD}</delay>
+                            <history>{$HISTORYSP}</history>
+                            <value_type>FLOAT</value_type>
+                            <units>C</units>
+                            <applications>
+                                <application>
+                                    <name>Environmental data</name>
+                                </application>
+                            </applications>
+                            <url>http://{HOST.CONN}/t/{#INDEX}</url>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{last(0)} &gt; {#AVERAGE_H}</expression>
+                                    <name>{#NAME} - The temperature is above the average limit ({#AVERAGE_H})</name>
+                                    <priority>AVERAGE</priority>
+                                    <description>The temperature readings from sensor {#NAME} is over threshold.</description>
+                                </trigger_prototype>
+                                <trigger_prototype>
+                                    <expression>{last(0)} &gt; {#DISASTER_H}</expression>
+                                    <name>{#NAME} - The temperature is above the disaster limit ({#DISASTER_H})</name>
+                                    <priority>DISASTER</priority>
+                                    <description>The temperature readings from sensor {#NAME} is over threshold.</description>
+                                </trigger_prototype>
+                                <trigger_prototype>
+                                    <expression>{last(0)} &gt; {#HIGH_H}</expression>
+                                    <name>{#NAME} - The temperature is above the high limit ({#HIGH_H})</name>
+                                    <priority>HIGH</priority>
+                                    <description>The temperature readings from sensor {#NAME} is over threshold.</description>
+                                </trigger_prototype>
+                                <trigger_prototype>
+                                    <expression>{last(0)} &lt; {#AVERAGE_L}</expression>
+                                    <name>{#NAME} - The temperature is below the average limit ({#AVERAGE_L})</name>
+                                    <priority>AVERAGE</priority>
+                                    <description>The temperature readings from sensor {#NAME} is below threshold.</description>
+                                </trigger_prototype>
+                                <trigger_prototype>
+                                    <expression>{last(0)} &lt; {#DISASTER_L}</expression>
+                                    <name>{#NAME} - The temperature is below the disaster limit ({#DISASTER_L})</name>
+                                    <priority>DISASTER</priority>
+                                    <description>The temperature readings from sensor {#NAME} is below threshold.</description>
+                                </trigger_prototype>
+                                <trigger_prototype>
+                                    <expression>{last(0)} &lt; {#HIGH_L}</expression>
+                                    <name>{#NAME} - The temperature is below the high limit ({#HIGH_L})</name>
+                                    <priority>HIGH</priority>
+                                    <description>The temperature readings from sensor {#NAME} is below threshold.</description>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                    </item_prototypes>
+                    <graph_prototypes>
+                        <graph_prototype>
+                            <name>{#NAME} Humidity</name>
+                            <graph_items>
+                                <graph_item>
+                                    <color>1A7C11</color>
+                                    <item>
+                                        <host>Template_ZBX-ESP-ENV</host>
+                                        <key>sensor.humidity[{#INDEX}]</key>
+                                    </item>
+                                </graph_item>
+                            </graph_items>
+                        </graph_prototype>
+                        <graph_prototype>
+                            <name>{#NAME} Temperature</name>
+                            <graph_items>
+                                <graph_item>
+                                    <color>1A7C11</color>
+                                    <item>
+                                        <host>Template_ZBX-ESP-ENV</host>
+                                        <key>sensor.temperature[{#INDEX}]</key>
+                                    </item>
+                                </graph_item>
+                            </graph_items>
+                        </graph_prototype>
+                    </graph_prototypes>
+                    <timeout>7s</timeout>
+                    <url>http://{HOST.CONN}/discovery</url>
+                    <preprocessing>
+                        <step>
+                            <type>JSONPATH</type>
+                            <params>$.data</params>
+                        </step>
+                    </preprocessing>
+                </discovery_rule>
+            </discovery_rules>
+            <macros>
+                <macro>
+                    <macro>{$HISTORYSP}</macro>
+                    <value>90d</value>
+                </macro>
+                <macro>
+                    <macro>{$INTERVALHTTP}</macro>
+                    <value>1m</value>
+                </macro>
+                <macro>
+                    <macro>{$INTERVALLLDHTTP}</macro>
+                    <value>1h</value>
+                </macro>
+                <macro>
+                    <macro>{$LOSTPERIOD}</macro>
+                    <value>10m</value>
+                </macro>
+                <macro>
+                    <macro>{$TRENDSP}</macro>
+                    <value>365d</value>
+                </macro>
+                <macro>
+                    <macro>{$UPINTERVALLLD}</macro>
+                    <value>5m</value>
+                </macro>
+            </macros>
+        </template>
+    </templates>
+</zabbix_export>
