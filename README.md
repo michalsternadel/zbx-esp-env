@@ -34,6 +34,8 @@ Use arduino IDE to compile and upload solution to your board.
 
 * Enable sensors in sensors.h file and change their configuration.
 
+* Hook DHT11 sensors to +3.3V, GND and configured data pins.
+
 * Upload sketch to your board.
 
 * Import Zabbix template and add a host to monitoring. The discovery process will get all the sensors and create graphs for you.
